@@ -1,6 +1,6 @@
 # Ray Tracer
 
-Descrption will copy from assignment later. ;)
+Descrption will add later ;)
 
 ## Prerequisites
 
@@ -15,3 +15,6 @@ Before you can use or compile this project, make sure you have the following dep
 2. cd computer-graphics
 3. make
 4. make run
+
+## Current Output
+![Output Image](output.png)
