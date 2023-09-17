@@ -1,6 +1,6 @@
-# Project Name
+# Ray Tracer
 
-Ray Tracer
+Descrption will copy from assignment later. ;)
 
 ## Prerequisites
 
@@ -11,4 +11,7 @@ Before you can use or compile this project, make sure you have the following dep
 
 ## Getting Started
 
-1. 
+1. git clone https://github.com/Mohammad-debug/computer-graphics.git
+2. cd computer-graphics
+3. make
+4. make run
