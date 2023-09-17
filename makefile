@@ -2,7 +2,7 @@ CXX      := g++
 OBJ_DIR  := obj
 APP_DIR  := bin
 TARGET   := ray_tracer
-INCLUDE  :=
+INCLUDE  := -Iinclude
 
 SRC  :=  $(wildcard *.cpp) 
 

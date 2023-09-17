@@ -1,6 +1,6 @@
 # Project Name
 
-Project Description: [Provide a brief description of your project here.]
+Ray Tracer
 
 ## Prerequisites
 
@@ -11,6 +11,4 @@ Before you can use or compile this project, make sure you have the following dep
 
 ## Getting Started
 
-1. Clone this repository to your local machine using the following command:
-   ```bash
-   git clone https://github.com/your-username/your-project.git
+1. 
