@@ -3,12 +3,17 @@
 #include "sphere.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+#include "interval.h"
 
 #include <iostream>
 
+double random_double(double min, double max) {
+    return min + (max - min) * (rand() / (RAND_MAX + 1.0));
+}
+
 color ray_color(const ray& r, const hittable& world) {
     hit_record rec;
-    if (world.hit(r, 0, std::numeric_limits<double>::infinity(), rec)) {
+    if (world.hit(r, interval(0, INFINITY), rec)) {
         return 0.5 * (rec.normal + color(1, 1, 1));
     }
 
@@ -17,20 +22,19 @@ color ray_color(const ray& r, const hittable& world) {
     return (1.0-a)*color(1.0, 1.0, 1.0) + a*color(0.5, 0.7, 1.0);
 }
 
-
-
 int main() {
     // Image
 
     auto aspect_ratio = 16.0 / 9.0;
     int image_width = 400;
+    int samples_per_pixel = 100; // Count of random samples for each pixel
+    auto scale = 1.0 / samples_per_pixel;
 
     // Calculate the image height, and ensure that it's at least 1.
     int image_height = static_cast<int>(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
 
     // World
-
     hittable_list world;
 
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
@@ -62,15 +66,27 @@ int main() {
     for (int j = 0; j < image_height; ++j) {
         std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
-            auto pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
-            auto ray_direction = pixel_center - camera_center;
-            ray r(camera_center, ray_direction);
-            color pixel_color = ray_color(r, world);
+            color pixel_color(0, 0, 0);
+            for (int sample = 0; sample < samples_per_pixel; ++sample) {
+                // Get ray
+                auto pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
+                double random1 = rand() / (RAND_MAX + 1.0);
+                double random2 = rand() / (RAND_MAX + 1.0);
+                auto pixel_sample_square = ((-0.5 + random1) * pixel_delta_u) + ((-0.5 + random2) * pixel_delta_v);
+                auto pixel_sample = pixel_center + pixel_sample_square;
+                auto ray_direction = pixel_sample - camera_center;
+                ray r(camera_center, ray_direction);
 
+                pixel_color += ray_color(r, world);
+            }
+
+
+            //Write color
+            static const interval intensity(0.000, 0.999);
             // Convert the color to integer values in the range [0, 255]
-            int ir = static_cast<int>(255.999 * pixel_color.x());
-            int ig = static_cast<int>(255.999 * pixel_color.y());
-            int ib = static_cast<int>(255.999 * pixel_color.z());
+            int ir = static_cast<int>(255.999 * intensity.clamp(scale * pixel_color.x()));
+            int ig = static_cast<int>(255.999 * intensity.clamp(scale * pixel_color.y()));
+            int ib = static_cast<int>(255.999 * intensity.clamp(scale * pixel_color.z()));
 
             // Calculate the index in the image_data array
             int index = 3 * (j * image_width + i);
