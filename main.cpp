@@ -35,6 +35,7 @@ color ray_color(const ray& r) {
 
 
 
+
 int main() {
     // Image
 
@@ -74,7 +75,7 @@ int main() {
             auto pixel_center = pixel00_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
             auto ray_direction = pixel_center - camera_center;
             ray r(camera_center, ray_direction);
-            color pixel_color = ray_color(r);
+            color pixel_color = ray_color2(r);
 
             // Convert the color to integer values in the range [0, 255]
             int ir = static_cast<int>(255.999 * pixel_color.x());
