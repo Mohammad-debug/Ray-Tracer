@@ -5,16 +5,16 @@
 #include "stb_image_write.h"
 #include "interval.h"
 
-#include <iostream>
+#define AMBIENT_STRENGTH 0.3f
+#define MAX_DEPTH 3
 
-double random_double(double min, double max) {
-    return min + (max - min) * (rand() / (RAND_MAX + 1.0));
-}
+#include <iostream>
 
 color ray_color(const ray& r, const hittable& world) {
     hit_record rec;
     if (world.hit(r, interval(0, INFINITY), rec)) {
-        return 0.5 * (rec.normal + color(1, 1, 1));
+        vec3 direction = random_on_hemisphere(rec.normal);
+        return 0.5 * ray_color(ray(rec.p, direction), world);
     }
 
     vec3 unit_direction = unit_vector(r.direction());
@@ -78,7 +78,10 @@ int main() {
                 auto ray_direction = pixel_sample - camera_center;
                 ray r(camera_center, ray_direction);
 
-                pixel_color += ray_color(r, world);
+                color objColor = ray_color(r, world);
+
+                pixel_color += objColor;
+                pixel_color += AMBIENT_STRENGTH * objColor; //adding ambience (?)
             }
 
 
