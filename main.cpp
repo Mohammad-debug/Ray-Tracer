@@ -42,11 +42,10 @@ int main() {
     world.add(make_shared<sphere>(point3(0,-100.5,-1), 100)); //ground
 
     // Camera
-
     auto focal_length = 1.0;
     auto viewport_height = 2.0;
     auto viewport_width = viewport_height * (static_cast<double>(image_width) / image_height);
-    auto camera_center = point3(4.1, 3, 7);
+    auto camera_center = point3(0, 0, 0);
 
     // Calculate the vectors across the horizontal and down the vertical viewport edges.
     auto viewport_u = vec3(viewport_width, 0, 0);
