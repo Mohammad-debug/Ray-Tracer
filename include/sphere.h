@@ -4,13 +4,15 @@
 #include "vec3.h"
 #include "hittable.h"
 #include "interval.h"
+#include "color.h"
 
 class sphere : public hittable {
 private:
     point3 center;
     double radius;
+    color  colorOfoject;
 public:
-	sphere(point3 _center, double _radius) : center(_center), radius(_radius) {}
+	sphere(point3 _center, double _radius, color _colorOfoject) : center(_center), radius(_radius), colorOfoject(_colorOfoject) {}
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
         vec3 oc = r.origin() - center;
@@ -34,7 +36,7 @@ public:
         rec.p = r.at(rec.t);
         vec3 outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
-
+        rec.col = colorOfoject;
         return true;
     }
 };

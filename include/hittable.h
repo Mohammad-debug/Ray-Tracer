@@ -5,16 +5,18 @@
 #include "interval.h"
 #include <memory>
 #include <vector>
+#include "color.h"
 
 using std::shared_ptr;
 using std::make_shared;
 
 class hit_record {
 public:
-    point3 p;
-    vec3 normal;
-    double t;
+    point3 p; // point of intersection
+    vec3 normal; // normal to surface
+    double t; // paramer for ray
     bool front_face;
+    color col;
 
     void set_face_normal(const ray& r, const vec3& outward_normal) {
         // Sets the hit record normal vector.
@@ -28,7 +30,6 @@ public:
 class hittable {
 public:
     virtual ~hittable() = default;
-
     virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
 };
 

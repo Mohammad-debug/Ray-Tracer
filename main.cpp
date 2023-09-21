@@ -4,8 +4,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 #include "interval.h"
-
-#define AMBIENT_STRENGTH 0.3f
+#define AMBIENT_STRENGTH 0.5f
 #define MAX_DEPTH 3
 
 #include <iostream>
@@ -14,7 +13,8 @@ color ray_color(const ray& r, const hittable& world) {
     hit_record rec;
     if (world.hit(r, interval(0, INFINITY), rec)) {
         vec3 direction = random_on_hemisphere(rec.normal);
-        return 0.5 * ray_color(ray(rec.p, direction), world);
+        //return 1 * ray_color(ray(rec.p, direction), world);
+        return rec.col;
     }
 
     vec3 unit_direction = unit_vector(r.direction());
@@ -37,9 +37,9 @@ int main() {
     // World
     hittable_list world;
 
-    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
-    world.add(make_shared<sphere>(point3(1, 0, -1), 0.2));
-    world.add(make_shared<sphere>(point3(0,-100.5,-1), 100)); //ground
+    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5, color(1,0,0)));
+    world.add(make_shared<sphere>(point3(1, 0, -1), 0.2, color(1,1,0)));
+    world.add(make_shared<sphere>(point3(0,-100.5,-1), 100, color(1,0,1))); //ground
 
     // Camera
     auto focal_length = 1.0;
@@ -80,10 +80,10 @@ int main() {
                 color objColor = ray_color(r, world);
 
                 pixel_color += objColor;
-                pixel_color += AMBIENT_STRENGTH * objColor; //adding ambience (?)
+                //pixel_color += AMBIENT_STRENGTH * objColor; //adding ambience (?)
             }
 
-
+             pixel_color = AMBIENT_STRENGTH * pixel_color;
             //Write color
             static const interval intensity(0.000, 0.999);
             // Convert the color to integer values in the range [0, 255]
