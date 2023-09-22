@@ -7,36 +7,40 @@
 #define AMBIENT_STRENGTH 0.3f
 #define DIFFUSE_STRENGTH 0.5f
 #define SPECULAR_STRENGTH 0.4f
-#define SHININESS 5.0f
+#define SHININESS 10000.0f
 #define MAX_DEPTH 50
-
 #include <iostream>
 
 color ray_color(const ray& r, const hittable& world, int depth) {
     hit_record rec;
-
+    vec3 lighSource = vec3(0, 1, 1);
     if (world.hit(r, interval(0.001, INFINITY), rec) && depth <= MAX_DEPTH) {
         //vec3 direction = random_on_hemisphere(rec.normal);
+
+        vec3 lightDir = unit_vector(lighSource - rec.p);
+        
         vec3 direction = rec.normal + random_unit_vector();
 
         //ambient
         vec3 ambient = rec.col * AMBIENT_STRENGTH;
 
         //diffuse
-        vec3 diffuse = DIFFUSE_STRENGTH * std::max(-dot(r.direction(), rec.normal), 0.0) * rec.col;
+        vec3 diffuse = DIFFUSE_STRENGTH * std::max(dot(rec.normal, lightDir), 0.0) * rec.col;
 
         //specular
-        vec3 refl_direction = reflect(r.direction(), rec.normal);
-        float shininess = pow(std::max(-dot(r.direction(), refl_direction), 0.0), SHININESS);
+        vec3 refl_direction = reflect_half(rec.normal, lightDir);
+        float shininess = pow(std::max(dot(rec.normal, refl_direction), 0.0), SHININESS);
         vec3 specular = rec.col * shininess * SPECULAR_STRENGTH;
         
+        
 
-        return ambient + diffuse + specular;
+        return color(ambient + diffuse + specular);
     }
 
-    vec3 unit_direction = unit_vector(r.direction());
-    auto a = 0.5*(unit_direction.y() + 1.0);
-    return (1.0-a)*color(1.0, 1.0, 1.0) + a*color(0.5, 0.7, 1.0);
+    // vec3 unit_direction = unit_vector(r.direction());
+    // auto a = 0.5*(unit_direction.y() + 1.0);
+    // return (1.0-a)*color(1.0, 1.0, 1.0) + a*color(0.5, 0.7, 1.0);
+    return color(0,0,0);
 }
 
 int main() {
@@ -53,7 +57,7 @@ int main() {
 
     // World
     hittable_list world;
-
+    //world.add(make_shared<sphere>(point3(1, 0.5, 1), 0.5, color(1, 1, 1)));
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5, color(1, 0, 0)));
     world.add(make_shared<sphere>(point3(1, 0, -1), 0.2, color(1, 1, 0)));
     world.add(make_shared<sphere>(point3(0, -100.5, -1), 100, color(1, 0, 1))); //ground
@@ -121,6 +125,5 @@ int main() {
 
     // Save the image as a PNG file using stb_image_write
     stbi_write_png("output.png", image_width, image_height, 3, image_data.data(), image_width * 3);
-
     std::clog << "\rDone. Image saved as 'output.png'\n";
 }
