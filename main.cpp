@@ -5,6 +5,9 @@
 #include "stb_image_write.h"
 #include "interval.h"
 #define AMBIENT_STRENGTH 0.3f
+#define DIFFUSE_STRENGTH 0.5f
+#define SPECULAR_STRENGTH 0.4f
+#define SHININESS 5.0f
 #define MAX_DEPTH 50
 
 #include <iostream>
@@ -13,10 +16,22 @@ color ray_color(const ray& r, const hittable& world, int depth) {
     hit_record rec;
 
     if (world.hit(r, interval(0.001, INFINITY), rec) && depth <= MAX_DEPTH) {
-        vec3 direction = random_on_hemisphere(rec.normal);
-        //float coeff = -1 * dot(r.direction(), rec.normal);
-        //return (rec.col * AMBIENT_STRENGTH) + ((-1 * dot(r.direction(), rec.normal)) * rec.col);
-        return (rec.col * AMBIENT_STRENGTH) + (0.5 * ray_color(ray(rec.p, direction), world, depth + 1));
+        //vec3 direction = random_on_hemisphere(rec.normal);
+        vec3 direction = rec.normal + random_unit_vector();
+
+        //ambient
+        vec3 ambient = rec.col * AMBIENT_STRENGTH;
+
+        //diffuse
+        vec3 diffuse = DIFFUSE_STRENGTH * std::max(-dot(r.direction(), rec.normal), 0.0) * rec.col;
+
+        //specular
+        vec3 refl_direction = reflect(r.direction(), rec.normal);
+        float shininess = pow(std::max(-dot(r.direction(), refl_direction), 0.0), SHININESS);
+        vec3 specular = rec.col * shininess * SPECULAR_STRENGTH;
+        
+
+        return ambient + diffuse + specular;
     }
 
     vec3 unit_direction = unit_vector(r.direction());
@@ -39,9 +54,9 @@ int main() {
     // World
     hittable_list world;
 
-    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5, color(1,0,0)));
-    world.add(make_shared<sphere>(point3(1, 0, -1), 0.2, color(1,1,0)));
-    world.add(make_shared<sphere>(point3(0,-100.5,-1), 100, color(1,0,1))); //ground
+    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5, color(1, 0, 0)));
+    world.add(make_shared<sphere>(point3(1, 0, -1), 0.2, color(1, 1, 0)));
+    world.add(make_shared<sphere>(point3(0, -100.5, -1), 100, color(1, 0, 1))); //ground
 
     // Camera
     auto focal_length = 1.0;
