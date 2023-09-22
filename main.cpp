@@ -7,8 +7,9 @@
 #define AMBIENT_STRENGTH 0.2f
 #define DIFFUSE_STRENGTH 0.4f
 #define SPECULAR_STRENGTH 0.6f
+#define MIRROR_STRENGTH 1.0f
 #define SHININESS 10000.0f
-#define MAX_DEPTH 50
+#define MAX_DEPTH 1
 #include <iostream>
 
 color ray_color(const ray& r, const hittable& world, int depth) {
@@ -35,7 +36,7 @@ color ray_color(const ray& r, const hittable& world, int depth) {
         float shininess = pow(std::max(dot(rec.normal, refl_direction), 0.0), SHININESS);
         vec3 specular = rec.col * shininess * SPECULAR_STRENGTH;
         
-        return color(ambient + diffuse + specular);
+        return color(ambient + diffuse + specular) + MIRROR_STRENGTH *ray_color(ray(rec.p, refl_direction), world, depth+1);
     }
 
     // vec3 unit_direction = unit_vector(r.direction());
@@ -61,13 +62,13 @@ int main() {
     //world.add(make_shared<sphere>(point3(1, 0.5, 1), 0.5, color(1, 1, 1)));
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5, color(1, 0, 0)));
     world.add(make_shared<sphere>(point3(1, -0.2, -1), 0.2, color(1, 1, 0)));
-    world.add(make_shared<sphere>(point3(0, -100.5, -1), 100, color(0.5, 0.25, 0.5))); //ground
+    world.add(make_shared<sphere>(point3(0, -100.5, -1), 100, color(0.5, 0.5, 0.5))); //ground
 
     // Camera
     auto focal_length = 1.0;
     auto viewport_height = 2.0;
     auto viewport_width = viewport_height * (static_cast<double>(image_width) / image_height);
-    auto camera_center = point3(0, 0, 0);
+    auto camera_center = point3(0, 0.5, 1);
 
     // Calculate the vectors across the horizontal and down the vertical viewport edges.
     auto viewport_u = vec3(viewport_width, 0, 0);
