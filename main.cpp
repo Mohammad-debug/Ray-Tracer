@@ -4,24 +4,30 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 #include "interval.h"
-#define AMBIENT_STRENGTH 0.3f
-#define MAX_DEPTH 50
-
+#define AMBIENT_STRENGTH 0.5f
+#define DIFFUSE_STRENGTH 0.5f
+#define MAX_DEPTH 5
+#include <math.h>
 #include <iostream>
 
 color ray_color(const ray& r, const hittable& world, int depth) {
     hit_record rec;
-
+    //vec3 lightDir = unit_vector(vec3(1.5, 0.5, -1));
     if (world.hit(r, interval(0.001, INFINITY), rec) && depth <= MAX_DEPTH) {
         vec3 direction = random_on_hemisphere(rec.normal);
+        vec3 lightDir = unit_vector(vec3(1.5, 0.5, -1) - rec.p);
         //float coeff = -1 * dot(r.direction(), rec.normal);
         //return (rec.col * AMBIENT_STRENGTH) + ((-1 * dot(r.direction(), rec.normal)) * rec.col);
-        return (rec.col * AMBIENT_STRENGTH) + (0.5 * ray_color(ray(rec.p, direction), world, depth + 1));
+        
+        float d = std::max(dot(lightDir, direction), 0.0);
+        //std::cout << d <<"\n";
+        return (rec.col * AMBIENT_STRENGTH*d) + (DIFFUSE_STRENGTH * ray_color(ray(rec.p, direction), world, depth + 1));
     }
 
     vec3 unit_direction = unit_vector(r.direction());
     auto a = 0.5*(unit_direction.y() + 1.0);
-    return (1.0-a)*color(1.0, 1.0, 1.0) + a*color(0.5, 0.7, 1.0);
+    return color(0, 0, 0);
+    //return (1.0-a)*color(1.0, 1.0, 1.0) + a*color(0.5, 0.7, 1.0);
 }
 
 int main() {
@@ -39,8 +45,10 @@ int main() {
     // World
     hittable_list world;
 
+    world.add(make_shared<sphere>(point3(1.5, 0.5, -1), 0.1, color(1,1,1)));
+
     world.add(make_shared<sphere>(point3(0, 0, -1), 0.5, color(1,0,0)));
-    world.add(make_shared<sphere>(point3(1, 0, -1), 0.2, color(1,1,0)));
+    world.add(make_shared<sphere>(point3(1, 0, -1), 0.2, color(0,1,0))); //green
     world.add(make_shared<sphere>(point3(0,-100.5,-1), 100, color(1,0,1))); //ground
 
     // Camera
@@ -60,7 +68,8 @@ int main() {
     // Calculate the location of the upper left pixel.
     auto viewport_upper_left = camera_center - vec3(0, 0, focal_length) - viewport_u / 2 - viewport_v / 2;
     auto pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
-
+    //set light direction..
+    
     // Create a buffer to store the pixel data
     std::vector<unsigned char> image_data(image_width * image_height * 3);
 
