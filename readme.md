@@ -23,8 +23,7 @@ Before you can use or compile this project, make sure you have the following dep
 
 ## Current Video
 You should now be able to watch the video created from the PNG files.
-
-To add a link, use [View Video](output_video.mp4) and replace `output_video.mp4` with the actual name of your video file. When someone clicks on the link, they will be able to view or download the video file.
+ [View Video](output_video.mp4) 
 
 
 
