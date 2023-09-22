@@ -8,11 +8,12 @@
 
 class sphere : public hittable {
 private:
-    point3 center;
+    
     double radius;
     color  colorOfoject;
     bool glaze;
 public:
+    point3 center;
 	sphere(point3 _center, double _radius, color _colorOfoject, bool _glaze) : center(_center), radius(_radius), colorOfoject(_colorOfoject), glaze(_glaze){}
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {

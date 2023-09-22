@@ -17,7 +17,7 @@ height, width, layers = first_frame.shape
 
 # Define the codec and create a VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # You can change the codec as needed
-out = cv2.VideoWriter(output_video, fourcc, 5.0, (width, height))
+out = cv2.VideoWriter(output_video, fourcc, 30.0, (width, height))
 
 # Iterate through the sorted PNG files and add them to the video
 for png_file in png_files:
