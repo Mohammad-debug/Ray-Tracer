@@ -62,7 +62,7 @@ int main()
     int image_width = 400;       // 800
     int samples_per_pixel = 100; // Count of random samples for each pixel
     auto scale = 1.0 / samples_per_pixel;
-
+    bool orthogonal = false;
     // Calculate the image height, and ensure that it's at least 1.
     int image_height = static_cast<int>(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
@@ -82,7 +82,7 @@ int main()
     // Create a buffer to store the pixel data
     std::vector<unsigned char> image_data(image_width * image_height * 3);
 
-    for (int t = 0; t < 50; t++)
+    for (int t = 0; t < 1; t++)
     {
         auto camera_center = point3(0, t*0.1, 1.5);
 
@@ -113,7 +113,16 @@ int main()
                     auto pixel_sample_square = ((-0.5 + random1) * pixel_delta_u) + ((-0.5 + random2) * pixel_delta_v);
                     auto pixel_sample = pixel_center + pixel_sample_square;
                     auto ray_direction = pixel_sample - camera_center;
-                    ray r(camera_center, ray_direction);
+                    orthogonal = false;
+                    ray r;
+                    if(orthogonal)
+                    {
+                        r = ray(pixel_sample, -vec3(0,0,1));
+                    }
+                    else 
+                    {
+                        r = ray(camera_center, ray_direction);
+                    }
 
                     int depth = 0;
                     color objColor = ray_color(r, world, depth);
@@ -141,7 +150,8 @@ int main()
         }
 
         // Save the image as a PNG file using stb_image_write
-        std::string str = "frames/output_" + std::to_string(t) + ".png";
+        //std::string str = "frames/output_" + std::to_string(t) + ".png";
+        std::string str = "output_" + std::to_string(t) + ".png";
         const char *charArray = str.c_str();
         stbi_write_png(charArray, image_width, image_height, 3, image_data.data(), image_width * 3);
         std::clog << "\rDone. Image saved as " << str << "\n";
