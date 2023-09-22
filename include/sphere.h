@@ -11,8 +11,9 @@ private:
     point3 center;
     double radius;
     color  colorOfoject;
+    bool glaze;
 public:
-	sphere(point3 _center, double _radius, color _colorOfoject) : center(_center), radius(_radius), colorOfoject(_colorOfoject) {}
+	sphere(point3 _center, double _radius, color _colorOfoject, bool _glaze) : center(_center), radius(_radius), colorOfoject(_colorOfoject), glaze(_glaze){}
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
         vec3 oc = r.origin() - center;
@@ -37,6 +38,7 @@ public:
         vec3 outward_normal = (rec.p - center) / radius;
         rec.set_face_normal(r, outward_normal);
         rec.col = colorOfoject;
+        rec.glaze = glaze;
         return true;
     }
 };

@@ -17,6 +17,7 @@ public:
     double t; // paramer for ray
     bool front_face;
     color col;
+    bool glaze;
 
     void set_face_normal(const ray& r, const vec3& outward_normal) {
         // Sets the hit record normal vector.
