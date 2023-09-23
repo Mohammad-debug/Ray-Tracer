@@ -8,6 +8,7 @@ Before you can use or compile this project, make sure you have the following dep
 
 - g++ (GNU C++ compiler)
 - make
+- opencv-python
 
 ## Getting Started
 
