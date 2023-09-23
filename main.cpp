@@ -5,13 +5,16 @@
 #include "stb_image_write.h"
 #include "interval.h"
 #define AMBIENT_STRENGTH 0.2f
-#define DIFFUSE_STRENGTH 0.4f
+#define DIFFUSE_STRENGTH 0.3f
 #define SPECULAR_STRENGTH 0.6f
 #define MIRROR_STRENGTH 0.5f
 #define SHININESS 10000.0f
 #define MAX_DEPTH 50
 #include <iostream>
 #include <string>
+#include <GL/glew.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 color ray_color(const ray &r, const hittable &world, int depth)
 {
@@ -30,7 +33,8 @@ color ray_color(const ray &r, const hittable &world, int depth)
 
         // ambient
         vec3 ambient = rec.col * AMBIENT_STRENGTH;
-
+        if (world.hit(seconadry_ray, interval(0.001, INFINITY), rec) && depth <= MAX_DEPTH)
+            return ambient;
         // diffuse
         vec3 diffuse = DIFFUSE_STRENGTH * std::max(dot(rec.normal, lightDir), 0.0) * rec.col;
 
@@ -52,6 +56,69 @@ color ray_color(const ray &r, const hittable &world, int depth)
     // auto a = 0.5*(unit_direction.y() + 1.0);
     // return (1.0-a)*color(1.0, 1.0, 1.0) + a*color(0.5, 0.7, 1.0);
     return color(0, 0, 0);
+}
+
+void DisplayImage(const std::vector<unsigned char> &image_data, int image_width, int image_height)
+{
+    if (!glfwInit())
+    {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
+        return;
+    }
+
+    // Create a windowed mode window and its OpenGL context
+    GLFWwindow *window = glfwCreateWindow(800, 600, "Image Display", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        std::cerr << "Failed to create GLFW window" << std::endl;
+        return;
+    }
+
+    // Make the window's context current
+    glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+
+    // Initialize GLEW
+    GLenum err = glewInit();
+    if (err != GLEW_OK)
+    {
+        std::cerr << "GLEW initialization error: " << glewGetErrorString(err) << std::endl;
+        glfwTerminate();
+        return;
+    }
+    // Flip the image vertically
+    std::vector<unsigned char> flipped_image(image_data);
+    for (int i = 0; i < image_height / 2; ++i)
+    {
+        int flip_i = image_height - 1 - i;
+        for (int j = 0; j < image_width * 3; ++j)
+        {
+            std::swap(flipped_image[i * image_width * 3 + j], flipped_image[flip_i * image_width * 3 + j]);
+        }
+    }
+
+    // Calculate the position to center the image
+    int xPos = (800 - image_width) / 2;
+    int yPos = (600 - image_height) / 2;
+
+    // Main rendering loop
+    while (!glfwWindowShouldClose(window))
+    {
+        // Render
+        // Set the raster position to center the image
+        //glRasterPos2i(xPos, yPos);
+
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawPixels(image_width, image_height, GL_RGB, GL_UNSIGNED_BYTE, &flipped_image[0]);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // Clean up
+
+    glfwTerminate();
 }
 
 int main()
@@ -81,10 +148,11 @@ int main()
 
     // Create a buffer to store the pixel data
     std::vector<unsigned char> image_data(image_width * image_height * 3);
+    // std::vector<unsigned char> image_data(image_width * image_height * 3);
 
     for (int t = 0; t < 1; t++)
     {
-        auto camera_center = point3(0, t*0.1, 1.5);
+        auto camera_center = point3(0, t * 0.1, 1.5);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
         auto viewport_u = vec3(viewport_width, 0, 0);
@@ -113,13 +181,13 @@ int main()
                     auto pixel_sample_square = ((-0.5 + random1) * pixel_delta_u) + ((-0.5 + random2) * pixel_delta_v);
                     auto pixel_sample = pixel_center + pixel_sample_square;
                     auto ray_direction = pixel_sample - camera_center;
-                    orthogonal = false;
+                    orthogonal = true;
                     ray r;
-                    if(orthogonal)
+                    if (orthogonal)
                     {
-                        r = ray(pixel_sample, -vec3(0,0,1));
+                        r = ray(pixel_sample, -vec3(0, 0, 1));
                     }
-                    else 
+                    else
                     {
                         r = ray(camera_center, ray_direction);
                     }
@@ -128,7 +196,6 @@ int main()
                     color objColor = ray_color(r, world, depth);
 
                     pixel_color += objColor;
-                    // pixel_color += AMBIENT_STRENGTH * objColor; //adding ambience (?)
                 }
 
                 // pixel_color += AMBIENT_STRENGTH * pixel_color;
@@ -150,10 +217,12 @@ int main()
         }
 
         // Save the image as a PNG file using stb_image_write
-        //std::string str = "frames/output_" + std::to_string(t) + ".png";
+        // std::string str = "frames/output_" + std::to_string(t) + ".png";
         std::string str = "output_" + std::to_string(t) + ".png";
+
         const char *charArray = str.c_str();
         stbi_write_png(charArray, image_width, image_height, 3, image_data.data(), image_width * 3);
+        DisplayImage(image_data, image_width, image_height);
         std::clog << "\rDone. Image saved as " << str << "\n";
     }
 }
