@@ -1,6 +1,6 @@
 # Ray Tracer
 
-Descrption will add later ;)
+CAP5705 Assignment 1
 
 ## Prerequisites
 
